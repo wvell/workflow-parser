@@ -215,6 +215,19 @@ func (p *Parser) checkFlows() {
 				// continue, checking other workflows
 			}
 		}
+
+		// make sure all the services exist and do not have a needs value
+		f.Services = uniqStrings(f.Services)
+		for _, actionID := range f.Services {
+			service, ok := actionmap[actionID]
+			if !ok {
+				p.addError(p.posMap[&f.Resolves], "Workflow `%s' depends on an unknown service `%s'", f.Identifier, actionID)
+				// continue, checking other workflows
+			} else if len(service.Needs) > 0 {
+				p.addError(p.posMap[&f.Resolves], "Workflow `%s' service `%s' has in invalid value for needs %q; expected empty array", f.Identifier, actionID, service.Needs)
+				// continue, checking other workflows
+			}
+		}
 	}
 }
 
@@ -683,6 +696,17 @@ func (p *Parser) workflowifyItem(item *ast.ObjectItem) *model.Workflow {
 			ok = p.parseRequiredString(&workflow.On, item.Val, "workflow", name, id)
 			if ok {
 				p.posMap[&workflow.On] = item
+			}
+		case "services":
+			if workflow.Services != nil {
+				p.addWarning(item.Val, "`services' redefined in workflow `%s'", id)
+				// continue, allowing the redefinition
+			}
+
+			workflow.Services, ok = p.literalToStringArray(item.Val, true)
+			if !ok {
+				p.addError(item.Val, "Invalid format for `services' in workflow `%s', expected list of strings", id)
+				// continue, allowing workflow with no `services`
 			}
 		case "resolves":
 			if workflow.Resolves != nil {

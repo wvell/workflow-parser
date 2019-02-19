@@ -704,6 +704,83 @@ func TestMultilineErrors(t *testing.T) {
 	assert.Len(t, pe.Errors, 4)
 }
 
+func TestResolvesServices(t *testing.T) {
+	workflow, err := parseString(`
+		workflow "foo" {
+			on = "push"
+			resolves = "a"
+			services = [ "elasticsearch" ]
+		}
+
+		action "a" { uses="./x" }
+		action "elasticsearch" { uses="docker://docker.elastic.co/elasticsearch/elasticsearch:6.6.1" }`)
+	assertParseSuccess(t, err, 2, 1, workflow)
+	if len(workflow.Workflows[0].Services) != 1 {
+		t.Fatal("expected service to be defined")
+	}
+
+	if workflow.Workflows[0].Services[0] != "elasticsearch" {
+		t.Fatalf("expected service `elasticsearch`; got: %q", workflow.Workflows[0].Services[0])
+	}
+}
+
+func TestServicesFailsWithNeeds(t *testing.T) {
+	_, err := parseString(`
+		workflow "foo" {
+			on = "push"
+			resolves = "a"
+			services = [ "elasticsearch" ]
+		}
+
+		action "a" {
+			uses="./x"
+		}
+
+		action "elasticsearch" {
+			uses="docker://docker.elastic.co/elasticsearch/elasticsearch:6.6.1"
+			needs = ["a"]
+		}
+		`)
+
+	if err == nil {
+		t.Fatal("services can not use the 'needs' fields")
+	}
+}
+
+func TestRequireMissingService(t *testing.T) {
+	_, err := parseString(`
+		workflow "foo" {
+			on = "push"
+			resolves = "a"
+			services = [ "elasticsearch" ]
+		}
+
+		action "a" { uses="./x" }`)
+
+	if err == nil {
+		t.Fatal("expected parse error due to missing service")
+	}
+}
+
+func TestDuplicateServicesFiltered(t *testing.T) {
+	workflow, err := parseString(`
+		workflow "foo" {
+			on = "push"
+			resolves = "a"
+			services = [ "a", "a" ]
+		}
+
+		action "a" { uses="./x" }`)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(workflow.Workflows[0].Services) != 1 {
+		t.Fatalf("expected services [\"a\"]; got %q", workflow.Workflows[0].Services)
+	}
+}
+
 /********** helpers **********/
 
 func assertParseSuccess(t *testing.T, err error, nactions int, nflows int, workflow *model.Configuration) {
