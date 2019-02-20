@@ -183,7 +183,7 @@ func (p *Parser) checkActions() {
 	}
 }
 
-var envVarChecker = regexp.MustCompile(`\A[A-Za-z_][A-Za-z_0-9]*\z`)
+var envVarChecker = regexp.MustCompile(`\A[A-Za-z_][A-Za-z_0-9\.]*\z`)
 
 func (p *Parser) checkEnvironmentVariable(key string, node ast.Node) {
 	if key != "GITHUB_TOKEN" && strings.HasPrefix(key, "GITHUB_") {
