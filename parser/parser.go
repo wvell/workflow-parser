@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/actions/workflow-parser/model"
+	"github.com/antonmedv/expr"
 	"github.com/hashicorp/hcl"
 	"github.com/hashicorp/hcl/hcl/ast"
 	hclparser "github.com/hashicorp/hcl/hcl/parser"
@@ -202,9 +203,12 @@ func (p *Parser) checkFlows() {
 		if f.On == "" {
 			p.addError(p.posMap[f], "Workflow `%s' must have an `on' attribute", f.Identifier)
 			// continue, checking other workflows
-		} else if !isAllowedEventType(f.On) {
-			p.addError(p.posMap[&f.On], "Workflow `%s' has unknown `on' value `%s'", f.Identifier, f.On)
-			// continue, checking other workflows
+		} else {
+			// make sure we have a valid expression
+			_, err := expr.Parse(f.On)
+			if err != nil {
+				p.addError(p.posMap[f], "Workflow `%s' `on' attribute %q uses an invalid expression: %v", f.Identifier, f.On, err)
+			}
 		}
 
 		// make sure that the actions that are resolved all exist
