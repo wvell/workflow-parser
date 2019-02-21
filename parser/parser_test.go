@@ -21,6 +21,26 @@ func TestParseWorkdirConfig(t *testing.T) {
 	}
 }
 
+func TestParseWorkflowDone(t *testing.T) {
+	workflow, err := parseString(`workflow "push" {
+		on = "push"
+		resolves = [ "a" ]
+		done = "a"
+	  }
+	action "a" { uses = "./x" }`)
+	assertParseSuccess(t, err, 1, 1, workflow)
+
+	workflow, err = parseString(`workflow "push" {
+		on = "push"
+		done = "a"
+	}`)
+
+	expect := "Workflow `push' 'done' uses unknown action `a'"
+	if err == nil || !strings.Contains(err.Error(), expect) {
+		t.Fatalf("parse error = %q; expect %q", workflow.GetAction("a").Workdir, expect)
+	}
+}
+
 func TestParseEmptyConfig(t *testing.T) {
 	workflow, err := parseString("")
 	assertParseSuccess(t, err, 0, 0, workflow)

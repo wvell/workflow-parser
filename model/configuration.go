@@ -27,6 +27,7 @@ type Workflow struct {
 	On         string
 	Resolves   []string
 	Services   []string
+	OnDone     string
 }
 
 // GetAction looks up action by identifier.

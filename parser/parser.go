@@ -217,6 +217,16 @@ func (p *Parser) checkFlows() {
 			}
 		}
 
+		if f.OnDone != "" {
+			onDoneAction, ok := actionmap[f.OnDone]
+			if !ok {
+				p.addError(p.posMap[&f.Resolves], "Workflow `%s' 'done' uses unknown action `%s'", f.Identifier, f.OnDone)
+				// continue, checking other workflows
+			} else if len(onDoneAction.Needs) > 0 {
+				p.addError(p.posMap[&f.Resolves], "Workflow `%s' 'done' has dependencies %q `%s'", f.Identifier, onDoneAction.Needs, f.OnDone)
+			}
+		}
+
 		// make sure all the services exist and do not have a needs value
 		f.Services = uniqStrings(f.Services)
 		for _, actionID := range f.Services {
@@ -723,6 +733,16 @@ func (p *Parser) workflowifyItem(item *ast.ObjectItem) *model.Workflow {
 			if !ok {
 				p.addError(item.Val, "Invalid format for `resolves' in workflow `%s', expected list of strings", id)
 				// continue, allowing workflow with no `resolves`
+			}
+		case "done":
+			if workflow.OnDone != "" {
+				p.addWarning(item.Val, "`done' redefined in workflow `%s'", id)
+				// continue, allowing the redefinition
+			}
+
+			workflow.OnDone, ok = p.literalToString(item.Val)
+			if !ok {
+				p.addError(item.Val, "Invalid format for `done' in workflow `%s', expected string", id)
 			}
 		default:
 			p.addWarning(item.Val, "Unknown workflow attribute `%s'", name)
