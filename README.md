@@ -1,6 +1,6 @@
 [actions]: https://github.com/features/actions/
 [workflow]: https://developer.github.com/actions/creating-workflows/creating-a-new-workflow/
-# The GitHub Actions Workflow Parser
+# The GitHub Actions Workflow Parser [![Build Status](https://travis-ci.org/wvell/workflow-parser.svg?branch=master)](https://travis-ci.org/wvell/workflow-parser)
 
 This is the [language specification](language.md) and the official parser
 for GitHub Actions [`main.workflow` files][workflow].  It is running in
