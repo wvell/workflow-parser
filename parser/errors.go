@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/actions/workflow-parser/model"
+	"github.com/wvell/workflow-parser/model"
 )
 
 type Error struct {

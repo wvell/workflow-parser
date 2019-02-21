@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/actions/workflow-parser/model"
+	"github.com/wvell/workflow-parser/model"
 	"github.com/antonmedv/expr"
 	"github.com/hashicorp/hcl"
 	"github.com/hashicorp/hcl/hcl/ast"

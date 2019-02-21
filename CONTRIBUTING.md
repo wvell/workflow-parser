@@ -1,6 +1,6 @@
 ## Contributing
 
-[fork]: https://github.com/actions/workflow-parser/fork
+[fork]: https://github.com/wvell/workflow-parser/fork
 [pr]: https://github.com/github/workflow-parser/compare
 [code-of-conduct]: CODE_OF_CONDUCT.md
 [effective-go]: https://golang.org/doc/effective_go.html

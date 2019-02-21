@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/actions/workflow-parser/parser"
+	"github.com/wvell/workflow-parser/parser"
 )
 
 func main() {

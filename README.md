@@ -15,7 +15,7 @@ To use the parser in your own projects, import it, and call the `Parse`
 function.
 
 ```go
-import "github.com/actions/workflow-parser/parser"
+import "github.com/wvell/workflow-parser/parser"
 ...
 config, err := parser.Parse(reader)
 ```

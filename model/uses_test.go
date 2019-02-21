@@ -17,12 +17,12 @@ func TestUsesStringer(t *testing.T) {
 			expected: "docker://alpine",
 		},
 		{
-			uses:     &UsesRepository{Repository: "actions/workflow-parser", Ref: "master"},
-			expected: "actions/workflow-parser@master",
+			uses:     &UsesRepository{Repository: "wvell/workflow-parser", Ref: "master"},
+			expected: "wvell/workflow-parser@master",
 		},
 		{
-			uses:     &UsesRepository{Repository: "actions/workflow-parser", Path: "path", Ref: "master"},
-			expected: "actions/workflow-parser/path@master",
+			uses:     &UsesRepository{Repository: "wvell/workflow-parser", Path: "path", Ref: "master"},
+			expected: "wvell/workflow-parser/path@master",
 		},
 		{
 			uses:     &UsesPath{Path: "path"},

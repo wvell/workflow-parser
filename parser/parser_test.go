@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/actions/workflow-parser/model"
+	"github.com/wvell/workflow-parser/model"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
