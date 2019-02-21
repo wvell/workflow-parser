@@ -18,6 +18,7 @@ type Action struct {
 	Needs      []string
 	Env        map[string]string
 	Secrets    []string
+	Workdir    string
 }
 
 // Workflow represents a single "workflow" stanza in a .workflow file.

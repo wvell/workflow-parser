@@ -186,9 +186,6 @@ func (p *Parser) checkActions() {
 var envVarChecker = regexp.MustCompile(`\A[A-Za-z_][A-Za-z_0-9\.]*\z`)
 
 func (p *Parser) checkEnvironmentVariable(key string, node ast.Node) {
-	if key != "GITHUB_TOKEN" && strings.HasPrefix(key, "GITHUB_") {
-		p.addWarning(node, "Environment variables and secrets beginning with `GITHUB_' are reserved")
-	}
 	if !envVarChecker.MatchString(key) {
 		p.addWarning(node, "Environment variables and secrets must contain only A-Z, a-z, 0-9, and _ characters, got `%s'", key)
 	}
@@ -586,6 +583,10 @@ func (p *Parser) parseActionAttribute(name string, action *model.Action, val ast
 		if secrets, ok := p.literalToStringArray(val, false); ok {
 			action.Secrets = secrets
 			p.posMap[&action.Secrets] = val
+		}
+	case "workdir":
+		if workdir, ok := p.literalToString(val); ok {
+			action.Workdir = workdir
 		}
 	default:
 		p.addWarning(val, "Unknown action attribute `%s'", name)

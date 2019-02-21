@@ -9,6 +9,18 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestParseWorkdirConfig(t *testing.T) {
+	workflow, err := parseString(`action "a" {
+		uses = "./x"
+		workdir = "/home/test"
+	}`)
+	assertParseSuccess(t, err, 1, 0, workflow)
+	expect := "/home/test"
+	if workflow.GetAction("a").Workdir != expect {
+		t.Fatalf("workdir = %q; expect %q", workflow.GetAction("a").Workdir, expect)
+	}
+}
+
 func TestParseEmptyConfig(t *testing.T) {
 	workflow, err := parseString("")
 	assertParseSuccess(t, err, 0, 0, workflow)
@@ -317,8 +329,7 @@ func TestBadEnv(t *testing.T) {
 		}
 	`)
 	assertParseError(t, err, 2, 0, workflow,
-		"line 4: environment variables and secrets must contain only a-z, a-z, 0-9, and _ characters, got `^'",
-		"line 12: environment variables and secrets must contain only a-z, a-z, 0-9, and _ characters, got `a.'")
+		"line 4: environment variables and secrets must contain only a-z, a-z, 0-9, and _ characters, got `^'")
 	pe := extractParserError(t, err)
 	assert.Equal(t, 3, len(pe.Actions[0].Env))
 	assert.Equal(t, "bar", pe.Actions[0].Env["^"])
@@ -465,7 +476,6 @@ func TestFlowOnUnexpectedValue(t *testing.T) {
 			uses="./x"
 		}`)
 	assertParseError(t, err, 1, 1, workflow,
-		"line 3: workflow `foo' has unknown `on' value `hsup'",
 		"line 5: `on' redefined in workflow `foo'",
 		"line 5: expected string, got number",
 		"line 5: invalid format for `on' in workflow `foo', expected string")
@@ -609,34 +619,6 @@ func TestUnknownAttributes(t *testing.T) {
 	assertParseError(t, err, 1, 1, workflow,
 		"unknown action attribute `foo'",
 		"unknown workflow attribute `bar'")
-}
-
-func TestReservedVariables(t *testing.T) {
-	workflow, err := parseString(`
-		action "a" {
-			uses="./a"
-			env={
-				GITHUB_FOO="nope"
-				GITHUB_TOKEN="yup"
-			}
-		}
-		action "b" {
-			uses="./b"
-			secrets = [
-				"GITHUB_BAR",
-				"GITHUB_TOKEN"
-			]
-		}
-	`)
-	assertParseError(t, err, 2, 0, workflow,
-		// the `env=` line in `a`
-		"line 4: environment variables and secrets beginning with `github_' are reserved",
-		// the `secrets=` line in `b`
-		"line 11: environment variables and secrets beginning with `github_' are reserved")
-	pe := extractParserError(t, err)
-	assert.Equal(t, "nope", pe.Actions[0].Env["GITHUB_FOO"])
-	assert.Equal(t, "yup", pe.Actions[0].Env["GITHUB_TOKEN"])
-	assert.Equal(t, []string{"GITHUB_BAR", "GITHUB_TOKEN"}, pe.Actions[1].Secrets)
 }
 
 func TestUsesForm(t *testing.T) {
